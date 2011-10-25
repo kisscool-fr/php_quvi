@@ -1,0 +1,29 @@
+php_quvi enable the support of libquvi in PHP.
+
+libquvi is a small C library that can be used to parse flash media stream URLs. More infos on http://quvi.sourceforge.net/
+
+
+Compile
+
+This should be sufficient :
+- phpize
+- ./configure --with-quvi
+- make
+- (as root) make install
+
+
+Usage
+
+<?php
+$url = 'http://www.dailymotion.com/video/xgdy1i_birdy-nam-nam-the-parachute-ending-stranger-remix_music';
+$mediaInfos = quvi($url);
+
+echo $mediaInfos['media_title']; // should echoes "Birdy Nam Nam - The Parachute Ending (Stranger Remix)"
+
+// show all infos
+var_dump($mediaInfos);
+
+
+License
+
+php_quvi is free software, licensed under the LGPLv2.1+.
