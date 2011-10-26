@@ -19,7 +19,7 @@
 static void php_quvi_version(char *buf, int buflen)
 {
     const char *vers ;
-    vers = quvi_version(QUVI_VERSION_LONG);
+    vers = quvi_version(QUVI_VERSION);
     snprintf(buf, buflen, "%s", vers);
 }
 
@@ -51,9 +51,10 @@ PHP_FUNCTION(quvi_version)
 
 PHP_FUNCTION(quvi)
 {
-    char *url, *page_url, *page_title, *media_id, *media_url, *media_content_type, *file_suffix, *response_code, *format, *start_time, *media_thumbnail_url;
-    double media_content_length, media_duration;
+    char *url, *host, *page_url, *page_title, *id, *media_url, *content_type, *file_suffix, *response_code, *format, *start_time, *thumbnail_url;
+    double content_length, duration;
     int url_length;
+    zval *link;
     quvi_media_t m;
     QUVIcode rc;
     quvi_t q;
@@ -77,33 +78,43 @@ PHP_FUNCTION(quvi)
         RETURN_NULL();
     }
 
+    quvi_getprop(m, QUVIPROP_HOSTID, &host);
     quvi_getprop(m, QUVIPROP_PAGEURL, &page_url);
     quvi_getprop(m, QUVIPROP_PAGETITLE, &page_title);
-    quvi_getprop(m, QUVIPROP_MEDIAID, &media_id);
+    quvi_getprop(m, QUVIPROP_MEDIAID, &id);
     quvi_getprop(m, QUVIPROP_MEDIAURL, &media_url);
-    quvi_getprop(m, QUVIPROP_MEDIACONTENTLENGTH, &media_content_length);
-    quvi_getprop(m, QUVIPROP_MEDIACONTENTTYPE, &media_content_type);
+    quvi_getprop(m, QUVIPROP_MEDIACONTENTLENGTH, &content_length);
+    quvi_getprop(m, QUVIPROP_MEDIACONTENTTYPE, &content_type);
     quvi_getprop(m, QUVIPROP_FILESUFFIX, &file_suffix);
+    /*
     quvi_getprop(m, QUVIPROP_RESPONSECODE, &response_code);
-    quvi_getprop(m, QUVIPROP_FORMAT, &format);
     quvi_getprop(m, QUVIPROP_STARTTIME, &start_time);
-    quvi_getprop(m, QUVIPROP_MEDIATHUMBNAILURL, &media_thumbnail_url);
-    quvi_getprop(m, QUVIPROP_MEDIADURATION, &media_duration);
+    */
+    quvi_getprop(m, QUVIPROP_MEDIADURATION, &duration);
+    quvi_getprop(m, QUVIPROP_FORMAT, &format);
+    quvi_getprop(m, QUVIPROP_MEDIATHUMBNAILURL, &thumbnail_url);
 
     array_init(return_value);
 
-    add_assoc_string(return_value, "page_url", page_url, 1);
+    add_assoc_string(return_value, "host", host, 1);
     add_assoc_string(return_value, "page_title", page_title, 1);
-    add_assoc_string(return_value, "media_id", media_id, 1);
-    add_assoc_string(return_value, "media_url", media_url, 1);
-    add_assoc_double(return_value, "media_content_length", media_content_length);
-    add_assoc_string(return_value, "media_content_type", media_content_type, 1);
-    add_assoc_string(return_value, "file_suffix", file_suffix, 1);
+    add_assoc_string(return_value, "page_url", page_url, 1);
+    /*
     add_assoc_long(return_value, "response_code", response_code);
-    add_assoc_string(return_value, "format", format, 1);
     add_assoc_string(return_value, "start_time", start_time, 1);
-    add_assoc_string(return_value, "media_thumbnail_url", media_thumbnail_url, 1);
-    add_assoc_double(return_value, "media_duration", media_duration);
+    */
+    add_assoc_double(return_value, "duration", duration);
+    add_assoc_string(return_value, "id", id, 1);
+    add_assoc_string(return_value, "format_requested", format, 1);
+    add_assoc_string(return_value, "thumbnail_url", thumbnail_url, 1);
+
+    ALLOC_INIT_ZVAL(link);
+    array_init(link);
+    add_assoc_double(link, "length_bytes", content_length);
+    add_assoc_string(link, "content_type", content_type, 1);
+    add_assoc_string(link, "file_suffix", file_suffix, 1);
+    add_assoc_string(link, "url", media_url, 1);
+    add_assoc_zval(return_value, "link", link);
 
     quvi_parse_close(&m);
     quvi_close(&q);
