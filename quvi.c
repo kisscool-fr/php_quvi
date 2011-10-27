@@ -10,23 +10,41 @@
 #endif
 
 #include "php.h"
+#include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_quvi.h"
 
 /**
  * Extension local function
  */
-static void php_quvi_version(char *buf, int buflen)
+static void php_quvi_version(char *buf)
 {
-    const char *vers ;
+    const char *vers;
     vers = quvi_version(QUVI_VERSION);
-    snprintf(buf, buflen, "%s", vers);
+    php_sprintf(buf, "%s", vers);
 }
 
+static void php_quvi_query_formats(char *url, char *buf)
+{
+    char *formats;
+    quvi_t q;
+
+    quvi_init(&q);
+    quvi_query_formats(q, url, &formats);
+
+    php_sprintf(buf, "%s", formats);
+
+    quvi_free(formats);
+    quvi_close(&q);
+}
+
+/**
+ * 
+ */
 PHP_MINFO_FUNCTION(quvi)
 {
     char vstr[128];
-    php_quvi_version(vstr, sizeof(vstr));
+    php_quvi_version(vstr);
 
     php_info_print_table_start();
 
@@ -39,14 +57,29 @@ PHP_MINFO_FUNCTION(quvi)
 
 PHP_FUNCTION(quvi_version)
 {
-    char vers[128];
+    char vstr[128];
 
-    if (ZEND_NUM_ARGS()) {
+    if (ZEND_NUM_ARGS())
+    {
         WRONG_PARAM_COUNT;
     }
 
-    php_quvi_version(vers, sizeof(vers));
-    RETURN_STRING(vers, 1);
+    php_quvi_version(vstr);
+    RETURN_STRING(vstr, 1);
+}
+
+PHP_FUNCTION(quvi_formats)
+{
+    char *url, avail_formats[128];
+    int url_length;
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &url, &url_length) == FAILURE)
+    {
+        RETURN_NULL();
+    }
+
+    php_quvi_query_formats(url, avail_formats);
+    RETURN_STRING(avail_formats, 1);
 }
 
 PHP_FUNCTION(quvi)
@@ -54,10 +87,18 @@ PHP_FUNCTION(quvi)
     char *url, *host, *page_url, *page_title, *id, *media_url, *content_type, *file_suffix, *response_code, *format, *start_time, *thumbnail_url;
     double content_length, duration;
     int url_length;
-    zval *link;
+    zval *link, *output, *format_requested;
     quvi_media_t m;
     QUVIcode rc;
     quvi_t q;
+
+    MAKE_STD_ZVAL(output);
+    MAKE_STD_ZVAL(format_requested);
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zz", &url, &url_length, &output, &format_requested) == FAILURE)
+    {
+        RETURN_NULL();
+    }
 
     rc = quvi_init(&q);
     if (rc != QUVI_OK)
@@ -66,9 +107,13 @@ PHP_FUNCTION(quvi)
         RETURN_NULL();
     }
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &url, &url_length) == FAILURE) {
-        RETURN_NULL();
+    /* init default format to the one define in INI */
+    if (Z_TYPE_P(format_requested) == IS_NULL)
+    {
+        ZVAL_STRING(format_requested, INI_STR("quvi.default_format_request"), 1);
     }
+
+    quvi_setopt(q, QUVIOPT_FORMAT, Z_STRVAL_P(format_requested));
 
     rc = quvi_parse(q, url, &m);
     if (rc != QUVI_OK)
@@ -120,8 +165,12 @@ PHP_FUNCTION(quvi)
     quvi_close(&q);
 }
 
+/**
+ * 
+ */
 zend_function_entry quvi_functions[] = {
     PHP_FE(quvi,         NULL)
+    PHP_FE(quvi_formats, NULL)
     PHP_FE(quvi_version, NULL)
     {NULL, NULL, NULL}
 };
@@ -132,16 +181,34 @@ zend_module_entry quvi_module_entry = {
 #endif
     PHP_QUVI_NAME,
     quvi_functions,
-    NULL,            /* MINIT */
-    NULL,            /* MSHUTDOWN */
-    NULL,            /* RINIT */
-    NULL,            /* RSHUTDOWN */
-    PHP_MINFO(quvi), /* MINFO */
+    PHP_MINIT(quvi),     /* MINIT */
+    PHP_MSHUTDOWN(quvi), /* MSHUTDOWN */
+    NULL,                /* RINIT */
+    NULL,                /* RSHUTDOWN */
+    PHP_MINFO(quvi),     /* MINFO */
 #if ZEND_MODULE_API_NO >= 20010901
     PHP_QUVI_VERSION,
 #endif
     STANDARD_MODULE_PROPERTIES
 };
+
+PHP_INI_BEGIN()
+    PHP_INI_ENTRY("quvi.default_format_request", "default", PHP_INI_ALL, NULL)
+PHP_INI_END()
+
+PHP_MINIT_FUNCTION(quvi)
+{
+    REGISTER_INI_ENTRIES();
+
+    return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(quvi)
+{
+    UNREGISTER_INI_ENTRIES();
+
+    return SUCCESS;
+}
 
 #ifdef COMPILE_DL_QUVI
 ZEND_GET_MODULE(quvi)

@@ -1,5 +1,5 @@
 PHP_ARG_WITH(quvi, for quvi support,
-    [  --with-quvi=[DIR]       Include quvi Support]
+    [  --with-quvi=[DIR]       Include quvi support]
 )
 
 if test "$PHP_QUVI" != "no"; then
