@@ -15,11 +15,13 @@ First of all, you will need a full PHP development working environnement. You ca
 Then, you will need the source of libquvi, available here http://quvi.sourceforge.net/, and of course, you'll need to build the lib before php_quvi.
 
 At least, you can build the extension::
+
     phpize
     ./configure --with-quvi
     make
 
 And at the end, install it (as root)::
+
     make install
 
 -------------
@@ -27,6 +29,7 @@ Configuration
 -------------
 
 Add the extension into your extension enable list (or load it with dl() into your PHP script)::
+
     extension=quvi.so
 
 -----
@@ -34,6 +37,7 @@ Usage
 -----
 
 Very easy. Example::
+
     <?php
     $url = 'http://www.dailymotion.com/video/xgdy1i_birdy-nam-nam-the-parachute-ending-stranger-remix_music';
     $mediaInfos = quvi($url);
@@ -64,6 +68,7 @@ Build environnment
 ------------------
 
 This extension is develop, build and test on::
+
     Linux Fedora 15 x86_64
     PHP 5.3.8 (php-devel.x86_64 / 5.3.8-3.fc15)
     libquvi 0.2.16.2 (quvi-devel.x86_64 / 0.2.16.2-1.fc15)
