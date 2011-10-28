@@ -41,6 +41,52 @@ static void php_quvi_query_formats(char *url, char *buf)
 /**
  * 
  */
+zend_function_entry quvi_functions[] = {
+    PHP_FE(quvi,         NULL)
+    PHP_FE(quvi_formats, NULL)
+    PHP_FE(quvi_version, NULL)
+    {NULL, NULL, NULL}
+};
+
+zend_module_entry quvi_module_entry = {
+#if ZEND_MODULE_API_NO >= 20010901
+    STANDARD_MODULE_HEADER,
+#endif
+    PHP_QUVI_NAME,
+    quvi_functions,
+    PHP_MINIT(quvi),     /* MINIT */
+    PHP_MSHUTDOWN(quvi), /* MSHUTDOWN */
+    NULL,                /* RINIT */
+    NULL,                /* RSHUTDOWN */
+    PHP_MINFO(quvi),     /* MINFO */
+#if ZEND_MODULE_API_NO >= 20010901
+    PHP_QUVI_VERSION,
+#endif
+    STANDARD_MODULE_PROPERTIES
+};
+
+#ifdef COMPILE_DL_QUVI
+ZEND_GET_MODULE(quvi)
+#endif
+
+PHP_INI_BEGIN()
+    PHP_INI_ENTRY("quvi.default_format_request", "default", PHP_INI_ALL, NULL)
+PHP_INI_END()
+
+PHP_MINIT_FUNCTION(quvi)
+{
+    REGISTER_INI_ENTRIES();
+
+    return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(quvi)
+{
+    UNREGISTER_INI_ENTRIES();
+
+    return SUCCESS;
+}
+
 PHP_MINFO_FUNCTION(quvi)
 {
     char vstr[128];
@@ -131,27 +177,26 @@ PHP_FUNCTION(quvi)
     quvi_getprop(m, QUVIPROP_MEDIACONTENTLENGTH, &content_length);
     quvi_getprop(m, QUVIPROP_MEDIACONTENTTYPE, &content_type);
     quvi_getprop(m, QUVIPROP_FILESUFFIX, &file_suffix);
-    /*
-    quvi_getprop(m, QUVIPROP_RESPONSECODE, &response_code);
-    quvi_getprop(m, QUVIPROP_STARTTIME, &start_time);
-    */
     quvi_getprop(m, QUVIPROP_MEDIADURATION, &duration);
     quvi_getprop(m, QUVIPROP_FORMAT, &format);
     quvi_getprop(m, QUVIPROP_MEDIATHUMBNAILURL, &thumbnail_url);
+
+    quvi_getprop(m, QUVIPROP_RESPONSECODE, &response_code);
+    quvi_getprop(m, QUVIPROP_STARTTIME, &start_time);
 
     array_init(return_value);
 
     add_assoc_string(return_value, "host", host, 1);
     add_assoc_string(return_value, "page_title", page_title, 1);
     add_assoc_string(return_value, "page_url", page_url, 1);
-    /*
-    add_assoc_long(return_value, "response_code", response_code);
-    add_assoc_string(return_value, "start_time", start_time, 1);
-    */
     add_assoc_double(return_value, "duration", duration);
     add_assoc_string(return_value, "id", id, 1);
     add_assoc_string(return_value, "format_requested", format, 1);
     add_assoc_string(return_value, "thumbnail_url", thumbnail_url, 1);
+    /*
+    add_assoc_long(return_value, "response_code", response_code);
+    add_assoc_string(return_value, "start_time", start_time, 1);
+    */
 
     ALLOC_INIT_ZVAL(link);
     array_init(link);
@@ -164,52 +209,3 @@ PHP_FUNCTION(quvi)
     quvi_parse_close(&m);
     quvi_close(&q);
 }
-
-/**
- * 
- */
-zend_function_entry quvi_functions[] = {
-    PHP_FE(quvi,         NULL)
-    PHP_FE(quvi_formats, NULL)
-    PHP_FE(quvi_version, NULL)
-    {NULL, NULL, NULL}
-};
-
-zend_module_entry quvi_module_entry = {
-#if ZEND_MODULE_API_NO >= 20010901
-    STANDARD_MODULE_HEADER,
-#endif
-    PHP_QUVI_NAME,
-    quvi_functions,
-    PHP_MINIT(quvi),     /* MINIT */
-    PHP_MSHUTDOWN(quvi), /* MSHUTDOWN */
-    NULL,                /* RINIT */
-    NULL,                /* RSHUTDOWN */
-    PHP_MINFO(quvi),     /* MINFO */
-#if ZEND_MODULE_API_NO >= 20010901
-    PHP_QUVI_VERSION,
-#endif
-    STANDARD_MODULE_PROPERTIES
-};
-
-PHP_INI_BEGIN()
-    PHP_INI_ENTRY("quvi.default_format_request", "default", PHP_INI_ALL, NULL)
-PHP_INI_END()
-
-PHP_MINIT_FUNCTION(quvi)
-{
-    REGISTER_INI_ENTRIES();
-
-    return SUCCESS;
-}
-
-PHP_MSHUTDOWN_FUNCTION(quvi)
-{
-    UNREGISTER_INI_ENTRIES();
-
-    return SUCCESS;
-}
-
-#ifdef COMPILE_DL_QUVI
-ZEND_GET_MODULE(quvi)
-#endif
