@@ -51,7 +51,7 @@ Very easy. Example::
 PHP function available
 ----------------------
 
-(array)  quvi(string $url [, string $output_format [, string $request_format]]);
+(array)  quvi(string $url [, string $request_format]);
 
 (string) quvi_formats(string $url);
 

@@ -10,6 +10,12 @@
 
 #include <quvi/quvi.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "php.h"
+
 #define PHP_QUVI_NAME       "quvi"
 #define PHP_QUVI_VERSION    "0.1"
 

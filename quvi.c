@@ -5,14 +5,9 @@
 
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "php.h"
+#include "php_quvi.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_quvi.h"
 
 /**
  * Extension local function
@@ -130,18 +125,15 @@ PHP_FUNCTION(quvi_formats)
 
 PHP_FUNCTION(quvi)
 {
-    char *url, *host, *page_url, *page_title, *id, *media_url, *content_type, *file_suffix, *response_code, *format, *start_time, *thumbnail_url;
+    char *url, *format_requested, *host, *page_url, *page_title, *id, *media_url, *content_type, *file_suffix, *response_code, *format, *start_time, *thumbnail_url;
     double content_length, duration;
-    int url_length;
-    zval *link, *output, *format_requested;
+    int url_length, format_requested_length;
+    zval *link;
     quvi_media_t m;
     QUVIcode rc;
     quvi_t q;
 
-    MAKE_STD_ZVAL(output);
-    MAKE_STD_ZVAL(format_requested);
-
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|zz", &url, &url_length, &output, &format_requested) == FAILURE)
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|s", &url, &url_length, &format_requested, &format_requested_length) == FAILURE)
     {
         RETURN_NULL();
     }
@@ -154,12 +146,13 @@ PHP_FUNCTION(quvi)
     }
 
     /* init default format to the one define in INI */
-    if (Z_TYPE_P(format_requested) == IS_NULL)
+    if (format_requested_length == 0)
     {
-        ZVAL_STRING(format_requested, INI_STR("quvi.default_format_request"), 1);
+        format_requested = INI_STR("quvi.default_format_request");
+        format_requested_length = strlen(format_requested);
     }
 
-    quvi_setopt(q, QUVIOPT_FORMAT, Z_STRVAL_P(format_requested));
+    quvi_setopt(q, QUVIOPT_FORMAT, format_requested);
 
     rc = quvi_parse(q, url, &m);
     if (rc != QUVI_OK)
