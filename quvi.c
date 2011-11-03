@@ -82,6 +82,10 @@ PHP_MINIT_FUNCTION(quvi)
 {
     REGISTER_INI_ENTRIES();
 
+    REGISTER_STRING_CONSTANT("QUVI_VERSION", PHP_QUVI_VERSION, CONST_CS | CONST_PERSISTENT);
+    REGISTER_STRING_CONSTANT("LIBQUVI_VERSION", quvi_version(QUVI_VERSION), CONST_CS | CONST_PERSISTENT);
+    REGISTER_STRING_CONSTANT("LIBQUVI_VERSION_LONG", quvi_version(QUVI_VERSION_LONG), CONST_CS | CONST_PERSISTENT);
+
     return SUCCESS;
 }
 
@@ -98,9 +102,9 @@ PHP_MINFO_FUNCTION(quvi)
     php_quvi_version(vstr);
 
     php_info_print_table_start();
-    php_info_print_table_header(2, "quvi support", "enabled");
+    php_info_print_table_header(2, "Quvi support", "enabled");
     php_info_print_table_row(2, "php_quvi version", PHP_QUVI_VERSION);
-    php_info_print_table_row(2, "libquvi version", vstr);
+    php_info_print_table_row(2, "Quvi Library Version", vstr);
     php_info_print_table_end();
 
     DISPLAY_INI_ENTRIES();

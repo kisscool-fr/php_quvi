@@ -12,9 +12,9 @@ Compile
 
 First of all, you will need a full PHP development working environnement. You can check here http://devzone.zend.com/article/1021#Heading5 if you don't know how to do that.
 
-Then, you will need the source of libquvi, available here http://quvi.sourceforge.net/, and of course, you'll need to build the lib before php_quvi.
+Then, you will need the source of libquvi, available here http://quvi.sourceforge.net/, and of course, you'll need to build it before php_quvi.
 
-At least, you can build the extension::
+When everything is ready, you can build the extension::
 
     phpize
     ./configure --with-quvi
@@ -38,7 +38,7 @@ If needed, restart your web server.
 Usage
 -----
 
-Very easy. Example::
+Very easy. Short example::
 
     <?php
     $url = 'http://www.dailymotion.com/video/xgdy1i_birdy-nam-nam-the-parachute-ending-stranger-remix_music';
@@ -66,10 +66,10 @@ More complex example : use a HTML 5 player instead of Flash player::
 Set default format to 'best' available::
 
     <?php
-    // You can use the optionnal parameter of quvi()
+    // For one video, you can use the optionnal parameter of quvi()
     quvi('http://some.video.url', 'best');
 
-    // or you can set the ini parameter
+    // or if you have a lot of video, you can set the ini parameter
     ini_set('quvi.default_format_request', 'best');
     quvi('http://some.video.url');
 
@@ -87,7 +87,15 @@ PHP function available
 INI optionnal parameters
 ------------------------
 
-* quvi.default_format_request : define the source format to request. Possible value : 'default' or 'best'. Default to 'default' (lowest quality available).
+* quvi.default_format_request : define the default source format to request. Possible value : 'default', 'best'. Default to 'default' (lowest quality available).
+
+-----------------------
+PHP constants available
+-----------------------
+
+* (string) QUVI_VERSION         : php_quvi version      (ie: 0.1)
+* (string) LIBQUVI_VERSION      : libquvi short version (ie: 0.2.16.2)
+* (string) LIBQUVI_VERSION_LONG : libquvi full version  (ie: 0.2.16.2 on 2011-10-08 for x86_64-redhat-linux-gnu (in))
 
 ------------------
 Build environnment
