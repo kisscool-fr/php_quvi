@@ -8,13 +8,15 @@
 #ifndef PHP_QUVI_H
 #define PHP_QUVI_H 1
 
-#include <quvi/quvi.h>
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "php.h"
+#include "php_ini.h"
+#include "ext/standard/info.h"
+
+#include <quvi/quvi.h>
 
 #define PHP_QUVI_NAME       "quvi"
 #define PHP_QUVI_VERSION    "0.1"

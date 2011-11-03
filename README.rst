@@ -32,6 +32,8 @@ Add the extension into your extension enable list (or load it with dl() into you
 
     extension=quvi.so
 
+If needed, restart your web server.
+
 -----
 Usage
 -----
@@ -40,12 +42,36 @@ Very easy. Example::
 
     <?php
     $url = 'http://www.dailymotion.com/video/xgdy1i_birdy-nam-nam-the-parachute-ending-stranger-remix_music';
-    $mediaInfos = quvi($url);
+    $mediaInfos = quvi($url);yy
 
     echo $mediaInfos['page_title']; // should echoes "Birdy Nam Nam - The Parachute Ending (Stranger Remix)"
 
     // show all available infos
     var_dump($mediaInfos);
+
+More complex example : use a HTML 5 player instead of Flash player::
+
+    <html>
+        <body>
+            <?php
+            $url = 'http://www.dailymotion.com/video/xjnhzd_kazantip-duplex-18-06-2011_music';
+            $media = quvi($url);
+            ?>
+            <video controls preload="none">
+                <source src="<?php echo $media['link']['url'] ?>" type="<?php echo $media['link']['content_type'] ?>" />
+            </video>
+        </body>
+    </html>
+
+Set default format to 'best' available::
+
+    <?php
+    // You can use the optionnal parameter of quvi()
+    quvi('http://some.video.url', 'best');
+
+    // or you can set the ini parameter
+    ini_set('quvi.default_format_request', 'best');
+    quvi('http://some.video.url');
 
 ----------------------
 PHP function available
