@@ -75,6 +75,7 @@ ZEND_INI_MH(php_quvi_ini_update_format_request)
 
 PHP_INI_BEGIN()
     PHP_INI_ENTRY("quvi.default_format_request", "default", PHP_INI_ALL, php_quvi_ini_update_format_request)
+    PHP_INI_ENTRY("quvi.format_delimiter", "|", PHP_INI_ALL, NULL)
 PHP_INI_END()
 
 /* Process functions */
@@ -128,8 +129,12 @@ PHP_FUNCTION(quvi_formats)
 {
     char *url, avail_formats[128];
     int url_length;
+    zval *delimiter, *formats;
 
-    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s", &url, &url_length) == FAILURE)
+    MAKE_STD_ZVAL(delimiter);
+    ZVAL_STRING(delimiter, INI_STR("quvi.format_delimiter"), 1);
+
+    if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "s|z", &url, &url_length, &delimiter) == FAILURE)
     {
         RETURN_NULL();
     }
@@ -141,7 +146,18 @@ PHP_FUNCTION(quvi_formats)
     }
 
     php_quvi_query_formats(url, avail_formats);
-    RETURN_STRING(avail_formats, 1);
+
+    if (sizeof(avail_formats) == 0)
+    {
+        RETURN_EMPTY_STRING();
+    }
+
+    MAKE_STD_ZVAL(formats);
+    
+    ZVAL_STRING(formats, avail_formats, 1);
+
+    array_init(return_value);
+    php_explode(delimiter, formats, return_value);
 }
 
 PHP_FUNCTION(quvi)

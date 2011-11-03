@@ -49,7 +49,23 @@ Very easy. Short example::
     // show all available infos
     var_dump($mediaInfos);
 
-More complex example : use a HTML 5 player instead of Flash player::
+Get all available formats for a media::
+
+    <?php
+    $url = '';
+    $availableFormats = quvi_formats($url);
+
+    // show an array with all available formats for the media
+    var_dump($availableFormats);
+
+Then, get a specific info from one of available formats (we supposed that we have at least 2 different formats in the array $availableFormats)::
+
+    $media = quvi($url, $availableFormats[1]);
+
+    // show all info for format $availableFormats[1] of media $url
+    var_dump($media);
+
+Complex example (^^) : use a HTML 5 player instead of Flash player::
 
     <html>
         <body>
@@ -63,7 +79,7 @@ More complex example : use a HTML 5 player instead of Flash player::
         </body>
     </html>
 
-Set default format to 'best' available::
+How to set default format to 'best' available::
 
     <?php
     // For one video, you can use the optionnal parameter of quvi()
@@ -77,9 +93,9 @@ Set default format to 'best' available::
 PHP function available
 ----------------------
 
-(array)  quvi(string $url [, string $request_format]);
+(array)  quvi(string $url [, string $request_format = 'default']);
 
-(string) quvi_formats(string $url);
+(array)  quvi_formats(string $url [, string $delimiter = '|']);
 
 (string) quvi_version();
 
@@ -88,6 +104,7 @@ INI optionnal parameters
 ------------------------
 
 * quvi.default_format_request : define the default source format to request. Possible value : 'default', 'best'. Default to 'default' (lowest quality available).
+* quvi.format_delimiter : define the delimiter of the string return by libquvi. By default, it's the character | (single pipe). This value should not be change while libquvi query_formats() return a piped string delimiter, but maybe this will change in the future ...
 
 -----------------------
 PHP constants available
