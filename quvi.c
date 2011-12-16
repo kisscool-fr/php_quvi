@@ -37,6 +37,7 @@ static void php_quvi_query_formats(char *url, char *buf)
 zend_function_entry quvi_functions[] = {
     PHP_FE(quvi,         NULL)
     PHP_FE(quvi_formats, NULL)
+    PHP_FE(quvi_support, NULL)
     PHP_FE(quvi_version, NULL)
     {NULL, NULL, NULL}
 };
@@ -158,6 +159,50 @@ PHP_FUNCTION(quvi_formats)
 
     array_init(return_value);
     php_explode(delimiter, formats, return_value);
+}
+
+PHP_FUNCTION(quvi_support)
+{
+    int done = 0;
+    char *domain, *formats;
+    QUVIcode rc;
+    quvi_t q;
+    zval *website;
+
+    rc = quvi_init(&q);
+    if (rc != QUVI_OK)
+    {
+        php_error_docref(NULL TSRMLS_CC, E_ERROR, "%s", quvi_strerror(q,rc));
+        RETURN_NULL();
+    }
+
+    array_init(return_value);
+
+    while (!done)
+    {
+        rc = quvi_next_supported_website(q, &domain, &formats);
+
+        switch (rc)
+        {
+            case QUVI_OK:
+                ALLOC_INIT_ZVAL(website);
+                array_init(website);
+                add_assoc_string(website, "domain", domain, 1);
+                add_assoc_string(website, "formats", formats, 1);
+                add_next_index_zval(return_value, website);
+
+                quvi_free(domain);
+                quvi_free(formats);
+                break;
+            case QUVI_LAST:
+                done = 1;
+                break;
+            default:
+                break;
+        }
+    }
+
+    quvi_close(&q);
 }
 
 PHP_FUNCTION(quvi)
